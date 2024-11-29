@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const App2 = () => {
+const Home = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -57,4 +57,4 @@ const App2 = () => {
   );
 };
 
-export default App2;
+export default Home;
