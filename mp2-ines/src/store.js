@@ -26,13 +26,6 @@ export const dogApi = createApi({
         params: { api_key: API_KEY_DOG },
       }),
     }),
-    // Nova query para buscar todos os cães
-    fetchAllDogs: builder.query({
-      query: () => ({
-        url: 'breeds',
-        params: { api_key: API_KEY_DOG },
-      }),
-    }),
   }),
 });
 
@@ -57,13 +50,6 @@ export const catApi = createApi({
     fetchCatById: builder.query({
       query: (id) => ({
         url: `images/${id}`,
-        params: { api_key: API_KEY_CAT },
-      }),
-    }),
-    // Nova query para buscar todos os gatos
-    fetchAllCats: builder.query({
-      query: () => ({
-        url: 'breeds',
         params: { api_key: API_KEY_CAT },
       }),
     }),

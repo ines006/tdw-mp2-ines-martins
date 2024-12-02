@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useFetchDogsQuery, useFetchCatsQuery } from '../store';
 import { useNavigate } from 'react-router-dom';
 
-const List = ({ selectedCategory }) => {
+const List = ({ selectedCategory, searchTerm }) => {
   const navigate = useNavigate();
 
+  // Estados de paginação
   const [pageDogs, setPageDogs] = useState(() => {
     return parseInt(localStorage.getItem('pageDogs')) || 1;
   });
@@ -20,10 +21,25 @@ const List = ({ selectedCategory }) => {
     localStorage.setItem('pageCats', pageCats);
   }, [pageCats]);
 
-  const { data: dogs, isLoading: isLoadingDogs } = useFetchDogsQuery({ limit: 15, page: pageDogs, order: 'asc' }); // Busque mais itens
-  const { data: cats, isLoading: isLoadingCats } = useFetchCatsQuery({ limit: 25, page: pageCats, order: 'asc' }); // Busque mais itens
+  // Hooks para buscar dados
+  const {
+    data: dogs,
+    isLoading: isLoadingDogs,
+    isError: isErrorDogs,
+    error: errorDogs,
+  } = useFetchDogsQuery({ limit: 15, page: pageDogs, order: 'asc' });
 
+  const {
+    data: cats,
+    isLoading: isLoadingCats,
+    isError: isErrorCats,
+    error: errorCats,
+  } = useFetchCatsQuery({ limit: 50, page: pageCats, order: 'asc' });
+
+  // Determinar estados atuais de carregamento e erro
   const isLoading = selectedCategory === 'dogs' ? isLoadingDogs : isLoadingCats;
+  const isError = selectedCategory === 'dogs' ? isErrorDogs : isErrorCats;
+  const error = selectedCategory === 'dogs' ? errorDogs : errorCats;
   const data = selectedCategory === 'dogs' ? dogs : cats;
 
   const totalPages = 10;
@@ -32,12 +48,12 @@ const List = ({ selectedCategory }) => {
     const breedMap = {};
     const groupedAnimals = [];
 
-    // Agrupar por raça
+    // Agrupar por raça, evitando repetição
     animals.forEach((animal) => {
       if (animal.breeds && animal.breeds.length > 0) {
         const breedName = animal.breeds[0].name;
         if (!breedMap[breedName]) {
-          breedMap[breedName] = animal;
+          breedMap[breedName] = animal; // Apenas uma instância da raça
           groupedAnimals.push(animal);
         }
       }
@@ -57,7 +73,17 @@ const List = ({ selectedCategory }) => {
     return groupedAnimals.slice(0, desiredCount); // Retornar exatamente o número desejado de itens
   };
 
-  const groupedAnimals = data ? groupByBreedAndFill(data, 5) : []; // Garantir 5 itens na página atual
+  const filterData = (data, searchTerm) => {
+    return data.filter((animal) => {
+      if (!animal.breeds || animal.breeds.length === 0) return false;
+      const breedName = animal.breeds[0]?.name.toLowerCase();
+      return breedName.startsWith(searchTerm.toLowerCase());
+    });
+  };
+  
+
+  const filteredAnimals = searchTerm ? filterData(data, searchTerm) : data;
+  const groupedAnimals = filteredAnimals ? groupByBreedAndFill(filteredAnimals, 5) : [];
 
   const handlePageChange = (page) => {
     if (selectedCategory === 'dogs') {
@@ -69,7 +95,22 @@ const List = ({ selectedCategory }) => {
 
   const currentPage = selectedCategory === 'dogs' ? pageDogs : pageCats;
 
+  // Exibir erro caso haja
+  if (isError) {
+    return (
+      <div>
+        <p>Error: {error.message || 'Something went wrong while fetching data.'}</p>
+      </div>
+    );
+  }
+
+  // Exibir carregamento enquanto os dados são buscados
   if (isLoading) return <p>Loading...</p>;
+
+  // Exibir mensagem caso não haja resultados para o termo de pesquisa
+  if (searchTerm && groupedAnimals.length === 0) {
+    return <p>No results found for "{searchTerm}"</p>;
+  }
 
   return (
     <div>
@@ -113,7 +154,6 @@ const List = ({ selectedCategory }) => {
           Próxima
         </button>
       </div>
-
     </div>
   );
 };

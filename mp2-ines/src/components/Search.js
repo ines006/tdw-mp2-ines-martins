@@ -11,6 +11,11 @@ const Search = ({ onSearchChange }) => {
     onSearchChange(inputValue); // Atualiza o estado pai com o valor do input
   };
 
+  const handleClear = () => {
+    setInputValue(""); // Limpa o campo de pesquisa
+    onSearchChange(""); // Reseta o estado da pesquisa na Home
+  };
+
   return (
     <div>
       <input
@@ -20,6 +25,7 @@ const Search = ({ onSearchChange }) => {
         onChange={handleInputChange} // Atualiza o estado local quando o valor muda
       />
       <button onClick={handleSearch}>Pesquisar</button>
+      {inputValue && <button onClick={handleClear}>Limpar</button>} {/* Exibe o botão "Limpar" quando há um termo de pesquisa */}
     </div>
   );
 };
