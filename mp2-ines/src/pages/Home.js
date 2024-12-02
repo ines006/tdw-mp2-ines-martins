@@ -1,58 +1,35 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import Filter from '../components/Filter';
+import Search from '../components/Search';
+import List from '../components/List';
 
 const Home = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [category, setCategory] = useState(() => {
+    return localStorage.getItem('category') || "dogs"; // Recupera do localStorage ou usa "dogs" como padrão
+  });
+  const [searchTerm, setSearchTerm] = useState(""); // Estado do termo de pesquisa
 
-  const API_KEY = "live_GqObdLXi8EyzPdE0T65HbhArhCtyQZ5StHU60KUp2iWs2uevtOgHY8WdI9ZA9vUh"; // Certifique-se de que a chave da API esteja correta
-
+  // Sincronizar estado com localStorage
   useEffect(() => {
-    const fetchDogs = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.thedogapi.com/v1/images/search?limit=10",
-          {
-            headers: {
-              "x-api-key": API_KEY,
-            },
-          }
-        );
-        setData(response.data);
-      } catch (err) {
-        setError("Erro ao carregar dados!");
-      } finally {
-        setLoading(false);
-      }
-    };
+    localStorage.setItem('category', category);
+  }, [category]);
 
-    fetchDogs();
-  }, []);
+  const handleCategory = (newCategory) => {
+    setCategory(newCategory);
+  };
 
-  if (loading) return <p>Carregando...</p>;
-  if (error) return <p>{error}</p>;
+  const handleSearch = (term) => {
+    setSearchTerm(term); // Atualiza o termo de pesquisa quando o usuário pesquisa
+  };
 
   return (
     <div>
-      <h1>Imagens de Cães e Raças</h1>
-      <ul>
-        {data.map((dog, index) => (
-          <li key={index}>
-            <img src={dog.url} alt={`Dog ${index + 1}`} style={{ width: "300px", height: "auto" }} />
-            <p>
-              {dog.breeds && dog.breeds.length > 0 
-                ? dog.breeds[0].name
-                : "Raça não disponível"}
-            </p>
-            <p>
-              {dog.breeds && dog.breeds.length > 0
-                ? dog.breeds[0].temperament
-                : "Temperamento não disponível"}
-            </p>
-          </li>
-        ))}
-      </ul>
+      {/* Passa os manipuladores de categoria e busca para o filtro */}
+      <Filter onCategoryChange={handleCategory} />
+      <Search onSearchChange={handleSearch} />
+      
+      {/* Passa categoria e termo de pesquisa para a lista */}
+      <List selectedCategory={category} searchTerm={searchTerm} />
     </div>
   );
 };
