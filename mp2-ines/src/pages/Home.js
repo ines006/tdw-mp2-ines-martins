@@ -4,31 +4,33 @@ import Search from '../components/Search';
 import List from '../components/List';
 
 const Home = () => {
+
+  const [searchTerm, setSearchTerm] = useState(""); // var de estado do termo pesquisado
+
+  // var de estado da categoria selecionada (guardado também em localStorage)
   const [category, setCategory] = useState(() => {
-    return localStorage.getItem('category') || "dogs"; // Recupera do localStorage ou usa "dogs" como padrão
+    return localStorage.getItem('category') || "dogs"; 
   });
-  const [searchTerm, setSearchTerm] = useState(""); // Estado do termo de pesquisa
 
   // Sincronizar estado com localStorage
   useEffect(() => {
     localStorage.setItem('category', category);
   }, [category]);
 
+  // função que atualiza a categoria (trigger compomente Filter)
   const handleCategory = (newCategory) => {
     setCategory(newCategory);
   };
 
+  // função que atualiza a pesquisa (trigger compomente Search)
   const handleSearch = (term) => {
-    setSearchTerm(term); // Atualiza o termo de pesquisa quando o usuário pesquisa
+    setSearchTerm(term); 
   };
 
   return (
     <div>
-      {/* Passa os manipuladores de categoria e busca para o filtro */}
       <Filter onCategoryChange={handleCategory} />
       <Search onSearchChange={handleSearch} />
-      
-      {/* Passa categoria e termo de pesquisa para a lista */}
       <List selectedCategory={category} searchTerm={searchTerm} />
     </div>
   );

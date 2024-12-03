@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useFetchDogByIdQuery, useFetchCatByIdQuery } from '../store';
 
 const Detail = () => {
-  const { id, category } = useParams(); // Obtém categoria e id da URL
+
   const navigate = useNavigate();
+
+  const { id, category } = useParams(); // Obtém categoria e id da URL
 
   // Decide qual API usar com base na categoria
   const { data: dog, isLoading: isLoadingDog } = useFetchDogByIdQuery(id, { skip: category !== 'dogs' });

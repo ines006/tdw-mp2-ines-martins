@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router-dom';
 const List = ({ selectedCategory, searchTerm }) => {
   const navigate = useNavigate();
 
-  // Estados de paginação
+  const totalPages = 10; // definido manualmente
+
+  // Estados de paginação guardados no localStorage
   const [pageDogs, setPageDogs] = useState(() => {
     return parseInt(localStorage.getItem('pageDogs')) || 1;
   });
@@ -13,8 +15,10 @@ const List = ({ selectedCategory, searchTerm }) => {
     return parseInt(localStorage.getItem('pageCats')) || 1;
   });
 
-  const [loadingPageChange, setLoadingPageChange] = useState(false); // Novo estado para controle de loading
+  // estado de controlo de loading manual
+  const [loadingPageChange, setLoadingPageChange] = useState(false); 
 
+  // Sincronizar páginas com o localStorage
   useEffect(() => {
     localStorage.setItem('pageDogs', pageDogs);
   }, [pageDogs]);
@@ -23,7 +27,10 @@ const List = ({ selectedCategory, searchTerm }) => {
     localStorage.setItem('pageCats', pageCats);
   }, [pageCats]);
 
-  // Hooks para buscar dados
+  const currentPage = selectedCategory === 'dogs' ? pageDogs : pageCats;
+
+
+  // Fetch de dados
   const {
     data: dogs,
     isLoading: isLoadingDogs,
@@ -38,43 +45,42 @@ const List = ({ selectedCategory, searchTerm }) => {
     error: errorCats,
   } = useFetchCatsQuery({ limit: 50, page: pageCats, order: 'asc' });
 
-  // Determinar estados atuais de carregamento e erro
+  // Determinar estados de carregamento e erro
   const isLoading = selectedCategory === 'dogs' ? isLoadingDogs : isLoadingCats;
   const isError = selectedCategory === 'dogs' ? isErrorDogs : isErrorCats;
   const error = selectedCategory === 'dogs' ? errorDogs : errorCats;
   const data = selectedCategory === 'dogs' ? dogs : cats;
 
-  const totalPages = 10;
-
+  // função que agrupa os dados por raças (raça e imagens únicas)
   const groupByBreedAndFill = (animals, desiredCount) => {
     const breedMap = {};
     const groupedAnimals = [];
 
-    // Agrupar por raça, evitando repetição
     animals.forEach((animal) => {
       if (animal.breeds && animal.breeds.length > 0) {
         const breedName = animal.breeds[0].name;
         if (!breedMap[breedName]) {
-          breedMap[breedName] = animal; // Apenas uma instância da raça
+          breedMap[breedName] = animal;
           groupedAnimals.push(animal);
         }
       }
     });
 
-    // Caso não tenha raças suficientes, preencha com raças repetidas
+    // Preenche com raças repetidas se não houver dados suficientes
     while (groupedAnimals.length < desiredCount) {
       for (const animal of Object.values(breedMap)) {
         if (groupedAnimals.length < desiredCount) {
-          groupedAnimals.push(animal); // Reutilizar as raças já agrupadas
+          groupedAnimals.push(animal);
         } else {
           break;
         }
       }
     }
 
-    return groupedAnimals.slice(0, desiredCount); // Retornar exatamente o número desejado de itens
+    return groupedAnimals.slice(0, desiredCount);
   };
 
+  // função que filtra os dados pelo termo pesquisado
   const filterData = (data, searchTerm) => {
     return data.filter((animal) => {
       if (!animal.breeds || animal.breeds.length === 0) return false;
@@ -84,10 +90,12 @@ const List = ({ selectedCategory, searchTerm }) => {
   };
 
   const filteredAnimals = searchTerm ? filterData(data, searchTerm) : data;
-  const groupedAnimals = filteredAnimals ? groupByBreedAndFill(filteredAnimals, 5) : [];
+  const groupedAnimals = filteredAnimals ? groupByBreedAndFill(filteredAnimals, 6) : [];
 
+
+  // função de manipulação de páginas conforme a categoria 
   const handlePageChange = (page) => {
-    setLoadingPageChange(true); // Ativar estado de carregamento ao mudar de página
+    setLoadingPageChange(true);
     if (selectedCategory === 'dogs') {
       setPageDogs(page);
     } else {
@@ -95,18 +103,15 @@ const List = ({ selectedCategory, searchTerm }) => {
     }
   };
 
+  // Lógica de loading entre categorias e entre páginas
   useEffect(() => {
-    if (loadingPageChange) {
-      const timeout = setTimeout(() => {
-        setLoadingPageChange(false); // Desativar o carregamento após a mudança de página
-      }, 500); // Simula um atraso para o carregamento (ajuste o tempo conforme necessário)
-      return () => clearTimeout(timeout);
+    if (!isLoading && loadingPageChange) {
+      setLoadingPageChange(false);
     }
-  }, [loadingPageChange]);
+  }, [isLoading, loadingPageChange]);
 
-  const currentPage = selectedCategory === 'dogs' ? pageDogs : pageCats;
 
-  // Exibir erro caso haja
+  // Exibir erro (caso haja)
   if (isError) {
     return (
       <div>
@@ -115,7 +120,7 @@ const List = ({ selectedCategory, searchTerm }) => {
     );
   }
 
-  // Exibir carregamento enquanto os dados são buscados ou entre a troca de páginas
+  // Exibir carregamento enquanto os dados são procurados ou entre a troca de páginas
   if (isLoading || loadingPageChange) {
     return <p>Loading...</p>;
   }
@@ -133,8 +138,8 @@ const List = ({ selectedCategory, searchTerm }) => {
             key={index}
             onClick={() => navigate(`/detail/${selectedCategory}/${animal.id}`)}
           >
-            <img src={animal.url} alt={animal.breeds[0]?.name || "Unknown Breed"} width="200" />
-            <p>{animal.breeds[0]?.name || "Unknown Breed"}</p>
+            <img src={animal.url} alt={animal.breeds[0]?.name || 'Unknown Breed'} width="200" />
+            <p>{animal.breeds[0]?.name || 'Unknown Breed'}</p>
           </div>
         ))}
       </div>
@@ -153,6 +158,7 @@ const List = ({ selectedCategory, searchTerm }) => {
             <button
               key={page}
               onClick={() => handlePageChange(page)}
+              disabled={currentPage === page}
             >
               {page}
             </button>
