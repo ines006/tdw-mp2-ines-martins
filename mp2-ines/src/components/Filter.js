@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const FilterContainer = styled.div`
   display: flex;
@@ -49,6 +50,11 @@ const Filter = ({ onCategoryChange, activeCategory }) => {
       ))}
     </FilterContainer>
   );
+};
+
+Filter.propTypes = {
+  onCategoryChange: PropTypes.func.isRequired, 
+  activeCategory: PropTypes.string.isRequired, 
 };
 
 export default Filter;

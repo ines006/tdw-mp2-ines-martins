@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFetchDogsQuery, useFetchCatsQuery } from '../store';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import PropTypes from 'prop-types'; 
 
 const GridContainer = styled.div`
   display: grid;
@@ -80,6 +81,16 @@ const LoadingContainer = styled.div`
   font-weight: bold;
 `;
 
+const NoResultsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 300px; 
+  font-size: 20px;
+  color: #333;
+`;
+
 
 const List = ({ selectedCategory, searchTerm }) => {
   const navigate = useNavigate();
@@ -146,15 +157,15 @@ const List = ({ selectedCategory, searchTerm }) => {
     });
 
     // Preenche com raças repetidas se não houver dados suficientes
-    while (groupedAnimals.length < desiredCount) {
-      for (const animal of Object.values(breedMap)) {
-        if (groupedAnimals.length < desiredCount) {
-          groupedAnimals.push(animal);
-        } else {
-          break;
-        }
-      }
-    }
+    // while (groupedAnimals.length < desiredCount) {
+    //   for (const animal of Object.values(breedMap)) {
+    //     if (groupedAnimals.length < desiredCount) {
+    //       groupedAnimals.push(animal);
+    //     } else {
+    //       break;
+    //     }
+    //   }
+    // }
 
     return groupedAnimals.slice(0, desiredCount);
   };
@@ -206,7 +217,7 @@ const List = ({ selectedCategory, searchTerm }) => {
 
   // Exibir mensagem caso não haja resultados para o termo de pesquisa
   if (searchTerm && groupedAnimals.length === 0) {
-    return <p>No results found for "{searchTerm}"</p>;
+    return <NoResultsContainer>No results found for "{searchTerm}"</NoResultsContainer>;
   }
 
   return (
@@ -258,6 +269,11 @@ const List = ({ selectedCategory, searchTerm }) => {
     </>
   );
   
+};
+
+List.propTypes = {
+  selectedCategory: PropTypes.oneOf(['dogs', 'cats']).isRequired, 
+  searchTerm: PropTypes.string, 
 };
 
 export default List;

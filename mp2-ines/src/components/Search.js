@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const SearchContainer = styled.div`
   display: flex;
@@ -66,6 +67,10 @@ const Search = ({ onSearchChange }) => {
     </SearchContainer>
     
   );
+};
+
+Search.propTypes = {
+  onSearchChange: PropTypes.func.isRequired,
 };
 
 export default Search;
