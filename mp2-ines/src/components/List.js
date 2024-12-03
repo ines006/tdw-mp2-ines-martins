@@ -1,6 +1,85 @@
 import React, { useState, useEffect } from 'react';
 import { useFetchDogsQuery, useFetchCatsQuery } from '../store';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+
+const GridContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin: 40px 0; 
+  padding: 0 20px; 
+`;
+
+const Card = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
+  height: 300px;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  img {
+    width: 100%;
+    height: 250px; 
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  h3 {
+    font-size: 18px;
+    color: #333;
+    margin: 15px 0 5px;
+  }
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+`;
+
+const PageButton = styled.button`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: ${({ active }) => (active ? '#3498db' : '#bdc3c7')};
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+
+  &:hover {
+    background-color: #95a5a6;
+  }
+
+  &:disabled {
+    background-color: #003366;
+    cursor: not-allowed;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 300px; 
+  font-size: 24px;
+  color: #333;
+  font-weight: bold;
+`;
+
 
 const List = ({ selectedCategory, searchTerm }) => {
   const navigate = useNavigate();
@@ -122,7 +201,7 @@ const List = ({ selectedCategory, searchTerm }) => {
 
   // Exibir carregamento enquanto os dados são procurados ou entre a troca de páginas
   if (isLoading || loadingPageChange) {
-    return <p>Loading...</p>;
+    return <LoadingContainer>Loading...</LoadingContainer>;
   }
 
   // Exibir mensagem caso não haja resultados para o termo de pesquisa
@@ -131,49 +210,54 @@ const List = ({ selectedCategory, searchTerm }) => {
   }
 
   return (
-    <div>
-      <div>
+    <>
+      <GridContainer>
         {groupedAnimals.map((animal, index) => (
-          <div
+          <Card
             key={index}
             onClick={() => navigate(`/detail/${selectedCategory}/${animal.id}`)}
           >
-            <img src={animal.url} alt={animal.breeds[0]?.name || 'Unknown Breed'} width="200" />
-            <p>{animal.breeds[0]?.name || 'Unknown Breed'}</p>
-          </div>
+            <img
+              src={animal.url}
+              alt={animal.breeds[0]?.name || 'Unknown Breed'}
+            />
+            <h3>{animal.breeds[0]?.name || 'Unknown Breed'}</h3>
+          </Card>
         ))}
-      </div>
-
-      <div>
-        <button
+      </GridContainer>
+  
+      <PaginationContainer>
+        <PageButton
           onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
           disabled={currentPage === 1}
         >
-          Anterior
-        </button>
-
+          Prev
+        </PageButton>
+  
         {[...Array(totalPages)].map((_, index) => {
           const page = index + 1;
           return (
-            <button
+            <PageButton
               key={page}
               onClick={() => handlePageChange(page)}
               disabled={currentPage === page}
+              active={currentPage === page}
             >
               {page}
-            </button>
+            </PageButton>
           );
         })}
-
-        <button
+  
+        <PageButton
           onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
           disabled={currentPage === totalPages}
         >
-          Próxima
-        </button>
-      </div>
-    </div>
+          Next
+        </PageButton>
+      </PaginationContainer>
+    </>
   );
+  
 };
 
 export default List;

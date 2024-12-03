@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Filter from '../components/Filter';
 import Search from '../components/Search';
 import List from '../components/List';
+import styled from 'styled-components';
+
+const HomeContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+`;
+
 
 const Home = () => {
 
@@ -28,11 +36,11 @@ const Home = () => {
   };
 
   return (
-    <div>
-      <Filter onCategoryChange={handleCategory} />
+    <HomeContainer>
+      <Filter onCategoryChange={handleCategory} activeCategory={category} />
       <Search onSearchChange={handleSearch} />
       <List selectedCategory={category} searchTerm={searchTerm} />
-    </div>
+    </HomeContainer>
   );
 };
 
