@@ -1,0 +1,36 @@
+name: CD Pipeline
+run-name: ${{ github.actor }} está fazer build  e a testar o Deploy no Netlify
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]  
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: |
+          cd mp2-ines
+          npm install
+
+      - name: Run Build
+        run: |
+          cd mp2-ines
+          npm run build
+
+      - name: Deploy to Netlify
+        id: netlify_deploy
+        run: |
+          netlify deploy --prod --dir mp2-ines/build --site ${{ secrets.NETLIFY_SITE_ID }} --auth ${{ secrets.NETLIFY_AUTH_TOKEN }} 
+

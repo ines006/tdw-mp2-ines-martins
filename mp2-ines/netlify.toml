@@ -1,0 +1,3 @@
+[build]
+  publish = "mp2-ines/build"  
+  command = "npm run build"  
