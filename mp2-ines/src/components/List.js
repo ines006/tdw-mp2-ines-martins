@@ -13,6 +13,8 @@ const List = ({ selectedCategory, searchTerm }) => {
     return parseInt(localStorage.getItem('pageCats')) || 1;
   });
 
+  const [loadingPageChange, setLoadingPageChange] = useState(false); // Novo estado para controle de loading
+
   useEffect(() => {
     localStorage.setItem('pageDogs', pageDogs);
   }, [pageDogs]);
@@ -80,18 +82,27 @@ const List = ({ selectedCategory, searchTerm }) => {
       return breedName.startsWith(searchTerm.toLowerCase());
     });
   };
-  
 
   const filteredAnimals = searchTerm ? filterData(data, searchTerm) : data;
   const groupedAnimals = filteredAnimals ? groupByBreedAndFill(filteredAnimals, 5) : [];
 
   const handlePageChange = (page) => {
+    setLoadingPageChange(true); // Ativar estado de carregamento ao mudar de página
     if (selectedCategory === 'dogs') {
       setPageDogs(page);
     } else {
       setPageCats(page);
     }
   };
+
+  useEffect(() => {
+    if (loadingPageChange) {
+      const timeout = setTimeout(() => {
+        setLoadingPageChange(false); // Desativar o carregamento após a mudança de página
+      }, 500); // Simula um atraso para o carregamento (ajuste o tempo conforme necessário)
+      return () => clearTimeout(timeout);
+    }
+  }, [loadingPageChange]);
 
   const currentPage = selectedCategory === 'dogs' ? pageDogs : pageCats;
 
@@ -104,8 +115,10 @@ const List = ({ selectedCategory, searchTerm }) => {
     );
   }
 
-  // Exibir carregamento enquanto os dados são buscados
-  if (isLoading) return <p>Loading...</p>;
+  // Exibir carregamento enquanto os dados são buscados ou entre a troca de páginas
+  if (isLoading || loadingPageChange) {
+    return <p>Loading...</p>;
+  }
 
   // Exibir mensagem caso não haja resultados para o termo de pesquisa
   if (searchTerm && groupedAnimals.length === 0) {
@@ -114,7 +127,6 @@ const List = ({ selectedCategory, searchTerm }) => {
 
   return (
     <div>
-      <h2>{selectedCategory === 'dogs' ? 'Dogs' : 'Cats'}</h2>
       <div>
         {groupedAnimals.map((animal, index) => (
           <div
