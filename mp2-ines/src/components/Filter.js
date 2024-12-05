@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
+import { CategoryContext } from "../contexts/CategoryContext";
 
 const FilterContainer = styled.div`
   display: flex;
@@ -34,27 +34,34 @@ const FilterButton = styled.button`
   }
 `;
 
-const Filter = ({ onCategoryChange, activeCategory }) => {
-  const categories = ["dogs", "cats"];
+const Filter = () => {
+
+  const { category, setCategory } = useContext(CategoryContext);
+
+  const handleChangeDogCategory = () => {
+    setCategory("dogs");
+  };
+
+  const handleChangeCatCategory = () => {
+    setCategory("cats");
+  };
 
   return (
     <FilterContainer>
-      {categories.map(category => (
-        <FilterButton
-          key={category}
-          active={activeCategory === category}
-          onClick={() => onCategoryChange(category)}
-        >
-          {category.charAt(0).toUpperCase() + category.slice(1)} 
-        </FilterButton>
-      ))}
+      <FilterButton 
+        onClick={handleChangeDogCategory} 
+        active={category === "dogs"}
+      >
+        Dogs
+      </FilterButton>
+      <FilterButton 
+        onClick={handleChangeCatCategory} 
+        active={category === "cats"}
+      >
+        Cats
+      </FilterButton>
     </FilterContainer>
   );
-};
-
-Filter.propTypes = {
-  onCategoryChange: PropTypes.func.isRequired, 
-  activeCategory: PropTypes.string.isRequired, 
 };
 
 export default Filter;

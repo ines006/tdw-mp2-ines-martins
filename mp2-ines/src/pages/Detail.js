@@ -2,6 +2,10 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFetchDogByIdQuery, useFetchCatByIdQuery } from '../store';
 import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart as SolidHeart } from '@fortawesome/free-solid-svg-icons'; // Ícone preenchido
+import { faHeart as RegularHeart } from '@fortawesome/free-regular-svg-icons'; // Ícone contorno
+
 
 const DetailContainer = styled.div`
   display: flex;
@@ -78,6 +82,27 @@ const LoadingContainer = styled.div`
   font-weight: bold;
 `;
 
+const HeartButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 36px;
+  color: #003366; 
+  transition: color 0.3s;
+`;
+
+const NoDetailsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 400px; 
+  font-size: 24px;
+  color: #333;
+  text-align: center;
+  width: 100%;
+`;
+
 
 const Detail = () => {
 
@@ -92,10 +117,31 @@ const Detail = () => {
   const isLoading = category === 'dogs' ? isLoadingDog : isLoadingCat;
   const animal = category === 'dogs' ? dog : cat;
 
+// Estado para favoritos (recupera do LocalStorage)
+const [favorites, setFavorites] = React.useState(() => {
+  const storedFavorites = localStorage.getItem('favorites');
+  return storedFavorites ? JSON.parse(storedFavorites) : [];
+});
+
+// Verifica se o animal está nos favoritos
+const isFavorite = favorites.some(fav => fav.id === id && fav.category === category);
+
+// Adiciona ou remove o animal dos favoritos
+const handleFavoriteToggle = () => {
+  let updatedFavorites;
+  if (isFavorite) {
+    updatedFavorites = favorites.filter(fav => !(fav.id === id && fav.category === category));
+  } else {
+    updatedFavorites = [...favorites, { id, category, url: animal.url, breeds: animal.breeds }];
+  }
+  setFavorites(updatedFavorites);
+  localStorage.setItem('favorites', JSON.stringify(updatedFavorites)); // Sincroniza com LocalStorage
+};
+
   if (isLoading) return <LoadingContainer>Loading...</LoadingContainer>;
 
 
-  if (!animal || !animal.breeds || animal.breeds.length === 0) return <p>No details available.</p>;
+  if (!animal || !animal.breeds || animal.breeds.length === 0) return <NoDetailsContainer>No details available</NoDetailsContainer>;
 
   const breedDetails = animal.breeds[0];
 
@@ -112,6 +158,10 @@ const Detail = () => {
         <p><strong>Life span: </strong>{breedDetails.life_span}</p>
         <button onClick={() => navigate(-1)}>Back</button>
       </TextSection>
+
+      <HeartButton onClick={handleFavoriteToggle}>
+        <FontAwesomeIcon icon={isFavorite ? SolidHeart : RegularHeart} />
+      </HeartButton>   
     </DetailContainer>
   );
 };

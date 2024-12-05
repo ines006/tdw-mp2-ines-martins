@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext  } from 'react';
 import { useFetchDogsQuery, useFetchCatsQuery } from '../store';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PropTypes from 'prop-types'; 
+import { CategoryContext } from "../contexts/CategoryContext";
 
 const GridContainer = styled.div`
   display: grid;
@@ -92,8 +93,10 @@ const NoResultsContainer = styled.div`
 `;
 
 
-const List = ({ selectedCategory, searchTerm }) => {
+const List = ({ searchTerm }) => {
   const navigate = useNavigate();
+
+  const { category } = useContext(CategoryContext);
 
   const totalPages = 10; // definido manualmente
 
@@ -117,7 +120,7 @@ const List = ({ selectedCategory, searchTerm }) => {
     localStorage.setItem('pageCats', pageCats);
   }, [pageCats]);
 
-  const currentPage = selectedCategory === 'dogs' ? pageDogs : pageCats;
+  const currentPage = category === 'dogs' ? pageDogs : pageCats;
 
 
   // Fetch de dados
@@ -136,10 +139,10 @@ const List = ({ selectedCategory, searchTerm }) => {
   } = useFetchCatsQuery({ limit: 50, page: pageCats, order: 'asc' });
 
   // Determinar estados de carregamento e erro
-  const isLoading = selectedCategory === 'dogs' ? isLoadingDogs : isLoadingCats;
-  const isError = selectedCategory === 'dogs' ? isErrorDogs : isErrorCats;
-  const error = selectedCategory === 'dogs' ? errorDogs : errorCats;
-  const data = selectedCategory === 'dogs' ? dogs : cats;
+  const isLoading = category === 'dogs' ? isLoadingDogs : isLoadingCats;
+  const isError = category === 'dogs' ? isErrorDogs : isErrorCats;
+  const error = category === 'dogs' ? errorDogs : errorCats;
+  const data = category === 'dogs' ? dogs : cats;
 
   // função que agrupa os dados por raças (raça e imagens únicas)
   const groupByBreedAndFill = (animals, desiredCount) => {
@@ -186,7 +189,7 @@ const List = ({ selectedCategory, searchTerm }) => {
   // função de manipulação de páginas conforme a categoria 
   const handlePageChange = (page) => {
     setLoadingPageChange(true);
-    if (selectedCategory === 'dogs') {
+    if (category === 'dogs') {
       setPageDogs(page);
     } else {
       setPageCats(page);
@@ -226,7 +229,7 @@ const List = ({ selectedCategory, searchTerm }) => {
         {groupedAnimals.map((animal, index) => (
           <Card
             key={index}
-            onClick={() => navigate(`/detail/${selectedCategory}/${animal.id}`)}
+            onClick={() => navigate(`/detail/${category}/${animal.id}`)}
           >
             <img
               src={animal.url}
@@ -272,7 +275,6 @@ const List = ({ selectedCategory, searchTerm }) => {
 };
 
 List.propTypes = {
-  selectedCategory: PropTypes.oneOf(['dogs', 'cats']).isRequired, 
   searchTerm: PropTypes.string, 
 };
 

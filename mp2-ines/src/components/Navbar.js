@@ -53,6 +53,11 @@ const Navbar = () => {
           </NavItem>
         </li>
         <li>
+          <NavItem to="/favorite" className={location.pathname === '/favorite' ? 'active' : ''}>
+            Favorites
+          </NavItem>
+        </li>
+        <li>
           <NavItem to="/about" className={location.pathname === '/about' ? 'active' : ''}>
             About
           </NavItem>
