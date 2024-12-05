@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useFetchDogByIdQuery, useFetchCatByIdQuery } from '../store';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart as SolidHeart } from '@fortawesome/free-solid-svg-icons'; // Ícone preenchido
-import { faHeart as RegularHeart } from '@fortawesome/free-regular-svg-icons'; // Ícone contorno
+import { faHeart as SolidHeart } from '@fortawesome/free-solid-svg-icons'; 
+import { faHeart as RegularHeart } from '@fortawesome/free-regular-svg-icons';
 
 
 const DetailContainer = styled.div`
