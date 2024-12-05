@@ -56,10 +56,11 @@ const Favorite = () => {
   const navigate = useNavigate(); 
 
   // Estado para animais favoritos
-  const [favAnimals, setFavAnimals] = useState(() => {
+  const [favAnimals] = useState(() => {
     const storedFavorites = localStorage.getItem("favorites");
     return storedFavorites ? JSON.parse(storedFavorites) : [];
   });
+  
 
   return (
     <FavContainer>
